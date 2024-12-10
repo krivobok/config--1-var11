@@ -17,3 +17,8 @@ python -m unittest tests.test_integration
 ```
 python -m unittest tests.test_vfs
 ```
+
+
+```
+![Скриншот тестов](../main/photo/img.png)
+```
