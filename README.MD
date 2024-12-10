@@ -20,5 +20,5 @@ python -m unittest tests.test_vfs
 
 
 ```
-![Скриншот тестов](../main/photo/img.png)
+![Скриншот тестов](main/photo/img.png)
 ```
