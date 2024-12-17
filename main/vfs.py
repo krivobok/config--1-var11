@@ -1,31 +1,33 @@
-import os
 import zipfile
-import tempfile
+import os
 
 class VirtualFileSystem:
     def __init__(self, zip_path):
-        self.root_dir = tempfile.mkdtemp()
-        self.current_dir = self.root_dir
-        self._load_zip(zip_path)
-
-    def _load_zip(self, zip_path):
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(self.root_dir)
+        self.zip_path = zip_path
+        self.current_dir = "/"
 
     def list_dir(self):
-        return os.listdir(self.current_dir)
+        with zipfile.ZipFile(self.zip_path, 'r') as zip_ref:
+            # Получаем список всех файлов в архиве
+            file_list = zip_ref.namelist()
+            # Отфильтровываем файлы по текущей директории
+            files_in_dir = [f for f in file_list if f.startswith(self.current_dir) and f != self.current_dir]
+            # Возвращаем только имена файлов в текущей директории
+            return [os.path.basename(f) for f in files_in_dir if f.count('/') == self.current_dir.count('/') + 1]
 
     def change_dir(self, path):
-        new_dir = os.path.abspath(os.path.join(self.current_dir, path))
-        if os.path.exists(new_dir) and os.path.isdir(new_dir):
-            self.current_dir = new_dir
-        else:
-            raise FileNotFoundError(f"Директория {path} не существует.")
+        # Преобразуем путь относительно корня архива
+        new_dir = os.path.join(self.current_dir, path)
+        with zipfile.ZipFile(self.zip_path, 'r') as zip_ref:
+            # Проверяем, существует ли эта директория в архиве
+            file_list = zip_ref.namelist()
+            if any(f.startswith(new_dir + '/') for f in file_list):
+                self.current_dir = new_dir
+            else:
+                raise FileNotFoundError(f"Директория {path} не существует в архиве.")
 
     def make_dir(self, dir_name):
-        os.mkdir(os.path.join(self.current_dir, dir_name))
+        raise NotImplementedError("Создание директорий не поддерживается в виртуальной файловой системе ZIP.")
 
     def move(self, src, dest):
-        src_path = os.path.join(self.current_dir, src)
-        dest_path = os.path.join(self.current_dir, dest)
-        os.rename(src_path, dest_path)
+        raise NotImplementedError("Перемещение файлов не поддерживается в виртуальной файловой системе ZIP.")
